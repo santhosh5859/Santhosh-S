@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Guard Security Portal{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="dashboard-card">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2><i class="fas fa-tachometer-alt me-3"></i>Welcome, {{ session.guard_name }}!</h2>
+                    <p class="mb-0" id="dateDisplay">Badge ID: {{ session.badge_id }} | Loading...</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <i class="fas fa-shield-alt fa-4x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="stats-card">
+            <i class="fas fa-users fa-2x text-primary mb-3"></i>
+            <div class="stats-number">{{ visitor_count }}</div>
+            <h5>Today's Visitors</h5>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="stats-card">
+            <i class="fas fa-clock fa-2x text-warning mb-3"></i>
+            <div class="stats-number">{{ active_visitors }}</div>
+            <h5>Active Visitors</h5>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center p-4">
+                <i class="fas fa-user fa-3x text-primary mb-3"></i>
+                <h4 class="card-title">Personal Information</h4>
+                <p class="card-text text-muted">View and edit your profile details, duty logs, and account settings.</p>
+                <a href="{{ url_for('profile') }}" class="btn btn-primary">
+                    <i class="fas fa-user-edit me-2"></i>View Profile
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center p-4">
+                <i class="fas fa-user-plus fa-3x text-success mb-3"></i>
+                <h4 class="card-title">Visitor Entry</h4>
+                <p class="card-text text-muted">Record new visitor details with photo, purpose, and digital signature.</p>
+                <a href="{{ url_for('visitor_entry') }}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Add Visitor
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-list-alt me-2"></i>Quick Actions
+                </h5>
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <a href="{{ url_for('visitor_tracking') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-search me-2"></i>Track Visitors
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="{{ url_for('visitor_entry') }}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-user-plus me-2"></i>New Entry
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="{{ url_for('profile') }}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-history me-2"></i>Duty Logs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Update current time display in IST
+    function updateTime() {
+        const now = new Date();
+        const options = { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true,
+            timeZone: 'Asia/Kolkata'
+        };
+        const formattedDate = now.toLocaleDateString('en-IN', options);
+        document.getElementById('dateDisplay').innerHTML = 
+            `Badge ID: {{ session.badge_id }} | ${formattedDate}`;
+    }
+    
+    // Update time every second
+    setInterval(updateTime, 1000);
+    updateTime();
+</script>
+{% endblock %}

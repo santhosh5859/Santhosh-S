@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Guard Security Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                    <h3 class="card-title">Guard Registration</h3>
+                    <p class="text-muted">Create your security guard account</p>
+                </div>
+                
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label for="full_name" class="form-label">
+                                <i class="fas fa-user me-2"></i>Full Name *
+                            </label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" required>
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Badge ID:</strong> A unique 4-digit Badge ID will be automatically assigned to your account upon registration.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock me-2"></i>Password *
+                        </label>
+                        <input type="password" class="form-control" id="password" name="password" required minlength="4">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">
+                                <i class="fas fa-phone me-2"></i>Phone Number
+                            </label>
+                            <input type="tel" class="form-control" id="phone" name="phone">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope me-2"></i>Email
+                            </label>
+                            <input type="email" class="form-control" id="email" name="email">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 mb-3">
+                        <i class="fas fa-user-plus me-2"></i>Register
+                    </button>
+                    
+                    <div class="text-center">
+                        <p class="mb-0">Already have an account?</p>
+                        <a href="{{ url_for('login') }}" class="text-decoration-none">Login here</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

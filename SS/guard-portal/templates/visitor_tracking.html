@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+
+{% block title %}Visitor Tracking - Guard Security Portal{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-users me-2"></i>Today's Visitor Tracking
+                </h4>
+                <div>
+                    <span class="badge bg-light text-dark fs-6" id="currentTime"></span>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if visitors %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Photo</th>
+                                <th>Visitor Name</th>
+                                <th>Purpose</th>
+                                <th>Check-in Time</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for visitor in visitors %}
+                            <tr class="{% if visitor.status == 'checked_in' %}table-warning{% else %}table-success{% endif %}">
+                                <td>
+                                    {% if visitor.visitor_image %}
+                                    <img src="{{ url_for('static', filename='uploads/' + visitor.visitor_image) }}" 
+                                         alt="Visitor Photo" class="rounded-circle" width="50" height="50" style="object-fit: cover;">
+                                    {% else %}
+                                    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" 
+                                         style="width: 50px; height: 50px;">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ visitor.visitor_name }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">{{ visitor.purpose_of_visit }}</span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        <span class="checkin-time" data-time="{{ visitor.checkin_time }}">{{ visitor.checkin_time }}</span>
+                                    </small>
+                                </td>
+                                <td>
+                                    {% if visitor.status == 'checked_in' %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-clock me-1"></i>Checked In
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Checked Out
+                                    </span>
+                                    <br><small class="text-muted checkout-time" data-time="{{ visitor.checkout_time }}">
+                                        {{ visitor.checkout_time }}
+                                    </small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if visitor.status == 'checked_in' %}
+                                    <a href="{{ url_for('checkout_visitor', visitor_id=visitor.id) }}" 
+                                       class="btn btn-sm btn-success checkout-btn" 
+                                       onclick="return confirm('Check out {{ visitor.visitor_name }}?')">
+                                        <i class="fas fa-sign-out-alt me-1"></i>Check Out
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted">Checked Out</span>
+                                    {% endif %}
+                                    <button type="button" class="btn btn-sm btn-outline-info ms-1" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#visitorModal{{ visitor.id }}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No visitors recorded today</h5>
+                    <p class="text-muted">Start by adding your first visitor entry.</p>
+                    <a href="{{ url_for('visitor_entry') }}" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i>Add First Visitor
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Visitor Detail Modals -->
+{% for visitor in visitors %}
+<div class="modal fade" id="visitorModal{{ visitor.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user me-2"></i>{{ visitor.visitor_name }} - Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        {% if visitor.visitor_image %}
+                        <img src="{{ url_for('static', filename='uploads/' + visitor.visitor_image) }}" 
+                             alt="Visitor Photo" class="img-fluid rounded mb-3" style="max-height: 200px;">
+                        {% else %}
+                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center mb-3" 
+                             style="height: 200px;">
+                            <i class="fas fa-user fa-4x text-white"></i>
+                        </div>
+                        {% endif %}
+                        
+                        {% if visitor.visitor_signature %}
+                        <div class="mt-3">
+                            <h6>Visitor Signature:</h6>
+                            <img src="{{ visitor.visitor_signature }}" alt="Visitor Signature" 
+                                 class="img-fluid border rounded" style="max-height: 100px;">
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="40%">Visitor Name:</th>
+                                <td>{{ visitor.visitor_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Purpose of Visit:</th>
+                                <td><span class="badge bg-primary">{{ visitor.purpose_of_visit }}</span></td>
+                            </tr>
+                            <tr>
+                                <th>Check-in Time:</th>
+                                <td class="modal-checkin-time" data-time="{{ visitor.checkin_time }}">{{ visitor.checkin_time }}</td>
+                            </tr>
+                            {% if visitor.checkout_time %}
+                            <tr>
+                                <th>Check-out Time:</th>
+                                <td class="modal-checkout-time" data-time="{{ visitor.checkout_time }}">{{ visitor.checkout_time }}</td>
+                            </tr>
+                            <tr>
+                                <th>Duration:</th>
+                                <td class="visit-duration" data-checkin="{{ visitor.checkin_time }}" data-checkout="{{ visitor.checkout_time }}">Calculating...</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <th>Status:</th>
+                                <td>
+                                    {% if visitor.status == 'checked_in' %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-clock me-1"></i>Currently Inside
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Visit Completed
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                {% if visitor.status == 'checked_in' %}
+                <a href="{{ url_for('checkout_visitor', visitor_id=visitor.id) }}" 
+                   class="btn btn-success modal-checkout-btn" 
+                   onclick="return confirm('Check out {{ visitor.visitor_name }}?')">
+                    <i class="fas fa-sign-out-alt me-1"></i>Check Out Visitor
+                </a>
+                {% endif %}
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+    // Parse timestamp from SQLite (UTC) and return as Date object
+    function parseTimestamp(timestamp) {
+        if (!timestamp) return new Date();
+        
+        // Handle SQLite timestamp format: "YYYY-MM-DD HH:MM:SS"
+        // Treat as UTC and convert to IST
+        const utcDate = new Date(timestamp + ' UTC');
+        return utcDate;
+    }
+    
+    function formatTime(timestamp) {
+        const date = parseTimestamp(timestamp);
+        if (isNaN(date.getTime())) {
+            return 'Invalid time';
+        }
+        return date.toLocaleTimeString('en-IN', { 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            hour12: true,
+            timeZone: 'Asia/Kolkata'
+        });
+    }
+    
+    function formatDate(timestamp) {
+        const date = parseTimestamp(timestamp);
+        if (isNaN(date.getTime())) {
+            return 'Invalid date';
+        }
+        return date.toLocaleDateString('en-IN', { 
+            month: 'short', 
+            day: 'numeric',
+            timeZone: 'Asia/Kolkata'
+        });
+    }
+    
+    function formatFullDateTime(timestamp) {
+        const date = parseTimestamp(timestamp);
+        if (isNaN(date.getTime())) {
+            return 'Invalid date/time';
+        }
+        return date.toLocaleDateString('en-IN', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true,
+            timeZone: 'Asia/Kolkata'
+        });
+    }
+    
+    // Calculate duration between two timestamps
+    function calculateDuration(checkinTime, checkoutTime) {
+        const checkin = parseTimestamp(checkinTime);
+        const checkout = parseTimestamp(checkoutTime);
+        
+        if (isNaN(checkin.getTime()) || isNaN(checkout.getTime())) {
+            return 'Invalid duration';
+        }
+        
+        const diffMs = checkout - checkin;
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        
+        if (diffHours > 0) {
+            return `${diffHours}h ${diffMinutes}m`;
+        } else {
+            return `${diffMinutes}m`;
+        }
+    }
+    
+    // Update current time
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', { hour12: true });
+    }
+    
+    // Format all timestamps on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Format check-in times
+        document.querySelectorAll('.checkin-time').forEach(function(element) {
+            const timestamp = element.getAttribute('data-time');
+            if (timestamp) {
+                element.innerHTML = formatTime(timestamp) + '<br>' + formatDate(timestamp);
+            }
+        });
+        
+        // Format checkout times
+        document.querySelectorAll('.checkout-time').forEach(function(element) {
+            const timestamp = element.getAttribute('data-time');
+            if (timestamp) {
+                element.textContent = formatTime(timestamp);
+            }
+        });
+        
+        // Format modal timestamps
+        document.querySelectorAll('.modal-checkin-time').forEach(function(element) {
+            const timestamp = element.getAttribute('data-time');
+            if (timestamp) {
+                element.textContent = formatFullDateTime(timestamp);
+            }
+        });
+        
+        document.querySelectorAll('.modal-checkout-time').forEach(function(element) {
+            const timestamp = element.getAttribute('data-time');
+            if (timestamp) {
+                element.textContent = formatFullDateTime(timestamp);
+            }
+        });
+        
+        // Calculate visit durations
+        document.querySelectorAll('.visit-duration').forEach(function(element) {
+            const checkinTime = element.getAttribute('data-checkin');
+            const checkoutTime = element.getAttribute('data-checkout');
+            if (checkinTime && checkoutTime) {
+                element.textContent = calculateDuration(checkinTime, checkoutTime);
+            }
+        });
+    });
+    
+    // Update time every second
+    setInterval(updateTime, 1000);
+    updateTime();
+    
+    // Auto refresh page every 30 seconds for real-time tracking
+    setTimeout(function() {
+        location.reload();
+    }, 30000);
+</script>
+{% endblock %}
