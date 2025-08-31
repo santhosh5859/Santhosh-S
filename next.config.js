@@ -2,7 +2,14 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['images.unsplash.com'], // For external images
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ['image/webp'],
@@ -30,10 +37,27 @@ const nextConfig = {
   output: 'export',
   // Optional: Add a trailing slash to all paths
   trailingSlash: true,
-  // Optional: Enable React's concurrent features
+  // Image configuration
+  images: {
+    unoptimized: true,
+    domains: [],
+    // Allow base64 images
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
+  // Webpack configuration
+  webpack: (config) => {
+    // Handle base64 images
+    config.module.rules.push({
+      test: /\.(png|jpg|jpeg|gif|svg|webp)$/i,
+      type: 'asset/inline',
+    });
+    return config;
+  },
+  // Experimental features
   experimental: {
-    concurrentFeatures: true,
-    serverComponents: true,
+    appDir: true,         // Enable the App Router (new in Next.js 13+)
   },
 };
 
